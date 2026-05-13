@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="turingchatfrontend.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+</Solution>

@@ -1,0 +1,66 @@
+/* Defines the global application theme system */
+
+:root {
+    /* Light Mode */
+    --text: #6a6675;
+    --text-h: #17161c;
+    --bg: #d9dbe2;
+    --code-bg: #e3e5ec;
+    --social-bg: rgba(30, 35, 60, 0.05);
+    --border: #d6d8e1;
+    --accent: #6f63d6;
+    --accent-bg: rgba(111, 99, 214, 0.10);
+    --accent-border: rgba(111, 99, 214, 0.30);
+    --shadow: rgba(0, 0, 0, 0.06) 0 6px 18px;
+    font: 18px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.15px;
+    color: var(--text);
+    background: var(--bg);
+}
+/* Dark Mode */
+[data-theme="dark"] {
+    --text: #d6d6e7;
+    --text-h: #ffffff;
+    --bg: #0b1020;
+    --code-bg: #1a1f36;
+    --social-bg: rgba(255, 255, 255, 0.06);
+    --border: #2a2a40;
+    --accent: #a29bfe;
+    --accent-bg: rgba(162, 155, 254, 0.15);
+    --accent-border: rgba(162, 155, 254, 0.5);
+    --shadow: rgba(0, 0, 0, 0.25) 0 12px 30px;
+}
+
+/* Global layout */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* iOS FIX  */
+@supports (-webkit-touch-callout: none) {
+    html, body {
+        height: -webkit-fill-available;
+    }
+}
+/* smooth theme transitions */
+* {
+    transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+#root {
+    width: 100%;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--bg), #e6e8ef);
+}
+
+/* iOS FIX */
+@supports (-webkit-touch-callout: none) {
+    #root {
+        height: -webkit-fill-available;
+    }
+}
