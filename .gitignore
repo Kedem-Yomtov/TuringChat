@@ -52,7 +52,8 @@ coverage/
 
 .metadata/
 application.properties
+turingChatBackend/src/main/resources/application.properties
+.env
 .vs/
 node_modules/
 dist/
-.env
