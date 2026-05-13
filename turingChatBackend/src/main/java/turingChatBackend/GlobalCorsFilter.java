@@ -21,7 +21,9 @@ public class GlobalCorsFilter {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
         		frontendUrl,
-                "http://localhost:56497"
+                "http://localhost:56497",
+                "http://localhost:5173",
+                "https://apple-underage-starlight.ngrok-free.dev"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

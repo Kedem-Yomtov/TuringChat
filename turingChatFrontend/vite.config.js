@@ -11,7 +11,10 @@ export default defineConfig({
     server: {
         host: true,
         port: 56497,
-        allowedHosts: ["turingchat.ngrok.app"],
+
+        allowedHosts: [
+            "turingchat.ngrok.app"
+        ],
 
         hmr: {
             protocol: "wss",

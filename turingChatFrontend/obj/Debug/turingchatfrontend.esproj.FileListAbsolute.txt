@@ -1,1 +1,2 @@
 C:\Users\Dell\Desktop\TuringChat\turingChatFrontend\obj\Debug\turingchatfrontend.esproj.CoreCompileInputs.cache
+C:\Users\Dell\Desktop\TuringChat\Turing Chat - Github\turingChatFrontend\obj\Debug\turingchatfrontend.esproj.CoreCompileInputs.cache
