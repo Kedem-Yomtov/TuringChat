@@ -78,7 +78,6 @@ The game combines live chat, WebSockets, AI-generated responses (Claude API), an
 
 **Infrastructure**
 - `SecurityConfig` – disables auth, configures CORS
-- `GlobalCorsFilter` – cross-origin rules
 
 ---
 
