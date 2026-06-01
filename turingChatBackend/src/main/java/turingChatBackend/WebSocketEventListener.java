@@ -103,7 +103,7 @@ public class WebSocketEventListener {
         Long lastConnect = lastConnectTime.get(sessionId);
         long now = System.currentTimeMillis();
 
-        if (lastConnect != null && (now - lastConnect) < 5000) {
+        if (lastConnect != null && (now - lastConnect) < 10000) {
             System.out.println("Ignoring transient disconnect (grace period) for " + playerId);
             return;
         }
@@ -132,7 +132,7 @@ public class WebSocketEventListener {
         }
 
         // send disconnect message
-        ChatMessage systemMsg = new ChatMessage(
+        /*ChatMessage systemMsg = new ChatMessage(
                 roomCode,
                 playerId,
                 player.getColor() + " left the chat",
@@ -143,7 +143,7 @@ public class WebSocketEventListener {
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomCode + "/chat",
                 systemMsg
-        );
+        );*/
 
         player.setOnline(false);
         System.out.println("setting " + player.getPlayerId() + " offline");

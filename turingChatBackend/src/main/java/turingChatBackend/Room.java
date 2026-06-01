@@ -132,13 +132,8 @@ public class Room {
         this.chatHistory = "";
 
         players.removeIf(Player::isBot);
-        /*
-        // SAFE iteration (no stream, no modification during traversal issues)
-        for (int i = 0; i < players.size(); i++) {
-            Player p = players.get(i);
-            p.setOnline(true);
-            
-        }*/
+        //players.removeIf(player -> !player.isOnline());
+       
         reassignAllColors();
     }
     

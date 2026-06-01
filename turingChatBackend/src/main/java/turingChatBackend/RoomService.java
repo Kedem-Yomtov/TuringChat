@@ -99,7 +99,10 @@ public class RoomService {
 
         boolean alreadyInRoom = room.getPlayers()
                 .stream()
-                .anyMatch(p -> normalize(p.getPlayerId()).equals(playerId));
+                .anyMatch(p ->
+                    normalize(p.getPlayerId())
+                        .equals(normalize(playerId))
+                );
 
         if (!alreadyInRoom) {
             room.addPlayer(playerId, false);
@@ -167,15 +170,17 @@ public class RoomService {
         );
         broadcast(updated);
         
+        String prompt = conversationStarterService.getRandomStarter();
+        room.addChatMessage("SYSTEM: " + prompt);
+        roomRepository.save(room);
         //start ai chatbot in room
-        botService.startBot(roomCode, bot.getColor());
+    
        
         new Thread(() -> {
-            try {
-            	String prompt = conversationStarterService.getRandomStarter();
-                room.addChatMessage("SYSTEM: " + prompt);
+            try {                
+                Thread.sleep(7000); //  delay for countdown sync
+                //send conversation starter message to users
                 
-                Thread.sleep(7000); // small delay for countdown sync
                 ChatMessage message = new ChatMessage(
                         roomCode,
                         "SYSTEM",
@@ -188,11 +193,13 @@ public class RoomService {
                         message
                 );
 
+                Thread.sleep(2000);
+                botService.startBot(roomCode, bot.getColor());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }).start();
-    
+        
         //start game timer
         new Thread(() -> {
             try {
@@ -217,27 +224,8 @@ public class RoomService {
 
         room.resetForNewRound();
         ensureAdminExists(room);
-
-        // 🔍 DEBUG: print admin after assignment
-        Player admin = room.getPlayers().stream()
-                .filter(Player::isAdmin)
-                .findFirst()
-                .orElse(null);
-
-       
         Room saved = roomRepository.saveAndFlush(room);
         broadcast(saved);
-        System.out.println("========== ADMIN DEBUG ==========");
-        if (admin != null) {
-            System.out.println("Admin playerId: " + admin.getPlayerId());
-            System.out.println("Admin color: " + admin.getColor());
-            System.out.println("Admin online: " + admin.isOnline());
-            System.out.println("Admin isBot: " + admin.isBot());
-        } else {
-            System.out.println("⚠️ NO ADMIN FOUND AFTER RESET");
-        }
-        System.out.println("=================================");
-
         return saved;
     }
     public static void ensureAdminExists(Room room) {

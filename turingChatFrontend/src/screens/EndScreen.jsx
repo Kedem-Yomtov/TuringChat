@@ -72,7 +72,9 @@ export default function EndScreen({
                 `${import.meta.env.VITE_API_BASE_URL}/room/reset/${room.roomCode}`,
                 { method: "POST" }
             );
-            setScreen("WAITING");
+
+           
+
         } catch (err) {
             console.error(err);
         }
