@@ -27,13 +27,13 @@ export default function WaitingScreen({
     );
 
     const isAdmin = myPlayer?.admin === true;
-    const canStart = players.length >= 2; //only let admin start game if more than 2 players are online
+    const canStart = players.length >= 2; //recommend only let player start from 2 or more
 
     const [displayText, setDisplayText] = useState("");
     const [typingIndex, setTypingIndex] = useState(0);
 
     async function handleStartGame() {
-        if (!isAdmin || !canStart) return;
+        if (!isAdmin) return;
 
         try {
             await startGame(room.roomCode, playerId);
@@ -212,14 +212,14 @@ export default function WaitingScreen({
                 {isAdmin && (
                     <button
                         onClick={handleStartGame}
-                        disabled={!canStart}
                         style={{
                             ...styles.button,
-                            opacity: canStart ? 1 : 0.6,
-                            cursor: canStart ? "pointer" : "not-allowed"
+                            cursor: "pointer"
                         }}
                     >
-                        {canStart ? "Start Game" : "Waiting for players..."}
+                        {canStart
+                            ? "Start Game"
+                            : "Start Game (1 player)"}
                     </button>
                 )}
             </div>

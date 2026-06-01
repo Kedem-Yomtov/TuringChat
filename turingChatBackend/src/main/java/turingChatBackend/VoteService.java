@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class VoteService {
 
     private final VoteRepository voteRepository;
-
+    
     public VoteService(VoteRepository voteRepository) {
         this.voteRepository = voteRepository;
     }

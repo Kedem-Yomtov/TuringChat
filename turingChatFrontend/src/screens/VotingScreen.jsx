@@ -101,7 +101,7 @@ export default function VotingScreen({ room, playerId, chat = [], setMyVote }) {
 
                 {/* Header */}
                 <div style={styles.header}>
-                    <h1 style={styles.title}>Voting Phase</h1>
+                    <h1 style={styles.title}>Vote!</h1>
                     <div style={styles.timer}>
                         {formatTime(timeLeft)}
                     </div>

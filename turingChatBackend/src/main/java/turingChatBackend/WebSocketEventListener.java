@@ -103,7 +103,7 @@ public class WebSocketEventListener {
         Long lastConnect = lastConnectTime.get(sessionId);
         long now = System.currentTimeMillis();
 
-        if (lastConnect != null && (now - lastConnect) < 3000) {
+        if (lastConnect != null && (now - lastConnect) < 5000) {
             System.out.println("Ignoring transient disconnect (grace period) for " + playerId);
             return;
         }
@@ -127,7 +127,7 @@ public class WebSocketEventListener {
 
         // safety: ignore during transitions
         if ("COUNTDOWN".equals(room.getStatus())) {
-            System.out.println("🟡 Ignoring disconnect during active game state");
+            System.out.println("Ignoring disconnect during active game state");
             return;
         }
 

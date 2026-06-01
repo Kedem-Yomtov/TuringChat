@@ -10,19 +10,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class VoteController {
 
     private final VoteService voteService;
+    private final RoomService roomService;
 
-    public VoteController(VoteService voteService) {
+    public VoteController(VoteService voteService, RoomService roomService) {
         this.voteService = voteService;
+        this.roomService = roomService;
     }
 
     @PostMapping("/vote")
     public void vote(@RequestBody VoteRequest req) {
+
+        // mark player as online when they interact
+        roomService.setPlayerOnline(req.getRoomCode(), req.getVoterId(), true);
+
         voteService.submitVote(
                 req.getRoomCode(),
                 req.getVoterId(),
                 req.getTargetColor()
         );
     }
-    
-    
 }

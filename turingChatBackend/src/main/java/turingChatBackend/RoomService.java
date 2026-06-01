@@ -172,8 +172,10 @@ public class RoomService {
        
         new Thread(() -> {
             try {
-                Thread.sleep(6000); // small delay for countdown sync
-                String prompt = conversationStarterService.getRandomStarter();
+            	String prompt = conversationStarterService.getRandomStarter();
+                room.addChatMessage("SYSTEM: " + prompt);
+                
+                Thread.sleep(7000); // small delay for countdown sync
                 ChatMessage message = new ChatMessage(
                         roomCode,
                         "SYSTEM",
@@ -289,5 +291,22 @@ public class RoomService {
             }
         }
         return id;
+    }
+    
+    public void setPlayerOnline(String roomCode, String playerId, boolean online) {
+
+        Room room = roomRepository.findByRoomCode(roomCode)
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        String cleanId = normalize(playerId);
+
+        room.getPlayers().stream()
+                .filter(p -> normalize(p.getPlayerId()).equals(cleanId))
+                .forEach(p -> p.setOnline(online));
+
+        ensureAdminExists(room);
+
+        Room saved = roomRepository.save(room);
+        broadcast(saved);
     }
 }

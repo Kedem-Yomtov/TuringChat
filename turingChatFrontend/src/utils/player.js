@@ -6,7 +6,7 @@ export function getOrCreatePlayerId() {
     let id = sessionStorage.getItem(KEY);
 
     if (!id) {
-        id = crypto.randomUUID();
+        id = Math.random().toString(36).substring(2) + Date.now().toString(36);
         sessionStorage.setItem(KEY, id);
     }
 

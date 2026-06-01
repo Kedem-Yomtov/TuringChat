@@ -91,7 +91,7 @@ public class BotService {
                             "- Sometimes respond late or not at all\n" +
                             "- You may occasionally send the first message if the chat is quiet or you want to appear proactive, but do this rarely\n\n" +
                             "- Sometimes saying, or starting with, entirely random things helps seem human\n" +
-                            "- Don't say yo\n" +
+                            "- Don't say yo, ngl, or sus\n" +
                             "- Ocassionally make small spelling mistakes\n" +
                             "- Sometimes don't use proper punctuation or capital letters\n" +
                             "PERSONALITY:\n" +
@@ -110,6 +110,7 @@ public class BotService {
                             "- If the message is more complex, increase waitseconds\n" +
                             "- If you feel no need to respond immediately → prefer higher values\n" +
                             "- Avoid consistent timing patterns\n\n" +
+                            "- Occasionally send consecutive messages\n\n" +
 
                             "CHAT CONTEXT:\n" +
                             "Your color: " + botColor + "\n" +
