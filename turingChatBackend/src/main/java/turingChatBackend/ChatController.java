@@ -38,7 +38,12 @@ public class ChatController {
                 .findFirst()
                 .orElse(null);
         
-        sender.setOnline(true); //verify if we got a message from someone we set them online
+        //ensure player is set to online	
+        if (sender != null && !sender.isOnline()) {
+            sender.setOnline(true);
+            roomRepository.save(room);
+        }
+        
         //set message color
         if (sender != null) {
             msg.setColor(sender.getColor());

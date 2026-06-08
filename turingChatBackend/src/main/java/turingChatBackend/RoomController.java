@@ -61,9 +61,16 @@ public class RoomController {
     @PostMapping("/start/{roomCode}")
     public ResponseEntity<Room> startGame(
             @PathVariable String roomCode,
-            @RequestParam String playerId) {
+            @RequestParam String playerId,
+            @RequestParam String language) {
+
         return ResponseEntity.ok(
-                roomService.startGame(roomCode, normalize(playerId)));
+                roomService.startGame(
+                        roomCode,
+                        normalize(playerId),
+                        language
+                )
+        );
     }
     //reset game with same players
     @PostMapping("/reset/{roomCode}")

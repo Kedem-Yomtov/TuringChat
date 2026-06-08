@@ -121,7 +121,7 @@ public class RoomService {
         return saved;
     }
    
-    public Room startGame(String roomCode, String playerId) {
+    public Room startGame(String roomCode, String playerId, String language) {
 
         Room room = roomRepository.findByRoomCode(roomCode)
                 .orElseThrow(() -> new RuntimeException("Room not found"));
@@ -151,50 +151,50 @@ public class RoomService {
         bot.setBot(true);
         bot.setOnline(true);
 
-        //save game state
-        Room updated = roomRepository.save(room);
+        String prompt = conversationStarterService.getRandomStarter(language);
 
-        //broadcast game start
-        try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        String languageMessage =
+                "hebrew".equalsIgnoreCase(language)
+                        ? "המשחק יתקיים בעברית"
+                        : "The game will be played in English";
+
+        // persist chat messages BEFORE save
+        room.addChatMessage("SYSTEM: " + languageMessage);
+        room.addChatMessage("SYSTEM: " + prompt);
+
+        Room saved = roomRepository.save(room);
+
+        // broadcast game start
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomCode + "/game-start",
-                (Object)Map.of(
+                Map.of(
                         "type", "GAME_START",
                         "gameEndsAt", gameEndsAt
                 )
         );
-        broadcast(updated);
-        
-        String prompt = conversationStarterService.getRandomStarter();
-        room.addChatMessage("SYSTEM: " + prompt);
-        roomRepository.save(room);
-        //start ai chatbot in room
-    
-       
+
+        broadcast(saved);
+
+        // async gameplay flow
         new Thread(() -> {
-            try {                
-                Thread.sleep(7000); //  delay for countdown sync
-                //send conversation starter message to users
-                
-                ChatMessage message = new ChatMessage(
-                        roomCode,
-                        "SYSTEM",
-                        prompt,
-                        "SYSTEM",
-                        false
-                );
+            try {
+                Thread.sleep(7000);
+
                 messagingTemplate.convertAndSend(
                         "/topic/room/" + roomCode + "/chat",
-                        message
+                        new ChatMessage(roomCode, "SYSTEM", languageMessage, "SYSTEM", false)
+                );
+
+                Thread.sleep(500);
+
+                messagingTemplate.convertAndSend(
+                        "/topic/room/" + roomCode + "/chat",
+                        new ChatMessage(roomCode, "SYSTEM", prompt, "SYSTEM", false)
                 );
 
                 Thread.sleep(2000);
                 botService.startBot(roomCode, bot.getColor());
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -214,7 +214,7 @@ public class RoomService {
             broadcast(room);
             votingService.startVoting(roomCode);
         }).start();
-        return updated;
+        return saved;
     }
 
     public Room resetRoom(String roomCode) {

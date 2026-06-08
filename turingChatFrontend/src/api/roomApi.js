@@ -37,11 +37,13 @@ export async function quickJoinRoom(playerId) {
     return await res.json();
 }
 
-// Start Game
-export async function startGame(roomCode, playerId) {
+//start game
+export async function startGame(roomCode, playerId, language)  {
     const res = await fetch(
-        `${BASE_URL}/start/${roomCode}?playerId=${playerId}`,
-        { method: "POST" }
+        `${BASE_URL}/start/${roomCode}?playerId=${playerId}&language=${language}`,
+        {
+            method: "POST"
+        }
     );
 
     if (!res.ok) throw new Error("Failed to start game");

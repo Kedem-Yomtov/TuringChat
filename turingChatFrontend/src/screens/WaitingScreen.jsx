@@ -22,6 +22,8 @@ export default function WaitingScreen({
         }
     };
 
+    const [language, setLanguage] = useState("ENGLISH");
+
     const myPlayer = players.find(
         p => normalizePlayerId(p) === playerId
     );
@@ -36,7 +38,11 @@ export default function WaitingScreen({
         if (!isAdmin) return;
 
         try {
-            await startGame(room.roomCode, playerId);
+            await startGame(
+                room.roomCode,
+                playerId,
+                language
+            );
         } catch (err) {
             console.error(err);
         }
@@ -177,7 +183,7 @@ export default function WaitingScreen({
                     <b style={{ color: myPlayer?.color || "var(--text-h)" }}>
                         {myPlayer?.color || "UNKNOWN"}
                     </b>
-                    {isAdmin && " 👑"}
+                    {isAdmin && " (Admin)"}
                 </div>
 
                 {/* Invite Button */}
@@ -209,18 +215,41 @@ export default function WaitingScreen({
                     </div>
                 )}
                 {/* if user is admin add start game option */}
+                
+                {/* Handle start game and language buttons (only visible to admin) */}
                 {isAdmin && (
-                    <button
-                        onClick={handleStartGame}
-                        style={{
-                            ...styles.button,
-                            cursor: "pointer"
-                        }}
-                    >
-                        {canStart
-                            ? "Start Game"
-                            : "Start Game (1 player)"}
-                    </button>
+                    <>
+                        <button
+                            onClick={() =>
+                                setLanguage(prev =>
+                                    prev === "HEBREW"
+                                        ? "ENGLISH"
+                                        : "HEBREW"
+                                )
+                            }
+                            style={{
+                                ...styles.button,
+                                marginBottom: 10,
+                                cursor: "pointer"
+                            }}
+                        >
+                            Language: {language === "HEBREW"
+                                ? "Hebrew"
+                                : "English"}
+                        </button>
+
+                        <button
+                            onClick={handleStartGame}
+                            style={{
+                                ...styles.button,
+                                cursor: "pointer"
+                            }}
+                        >
+                            {canStart
+                                ? "Start Game"
+                                : "Start Game (1 player)"}
+                        </button>
+                    </>
                 )}
             </div>
         </div>
@@ -353,7 +382,6 @@ const styles = {
         cursor: "pointer"
     },
 
-    // NEW (minimal addition only)
     lobbyTip: {
         fontSize: 12,
         opacity: 0.65,

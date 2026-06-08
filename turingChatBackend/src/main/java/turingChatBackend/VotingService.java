@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,6 +18,12 @@ public class VotingService {
     private final RoomRepository roomRepository;
 
     private final long VOTING_DURATION_MS = 20_000;
+
+    // prevents double-finishing per room
+    private final Map<String, AtomicBoolean> finishingFlags = new ConcurrentHashMap<>();
+
+    // snapshot of expected voters per room
+    private final Map<String, Set<String>> expectedVotersPerRoom = new ConcurrentHashMap<>();
 
     public VotingService(VoteService voteService,
                          SimpMessagingTemplate messagingTemplate,
@@ -31,6 +39,20 @@ public class VotingService {
 
         voteService.clearVotes(roomCode);
 
+        finishingFlags.put(roomCode, new AtomicBoolean(false));
+
+        Room room = roomRepository.findByRoomCode(roomCode).orElse(null);
+        if (room == null) return;
+
+        Set<String> expectedVoters = room.getPlayers()
+                .stream()
+                .filter(Player::isOnline)
+                .filter(p -> !p.isBot())
+                .map(p -> normalize(p.getPlayerId()))
+                .collect(Collectors.toSet());
+
+        expectedVotersPerRoom.put(roomCode, expectedVoters);
+
         long endTime = System.currentTimeMillis() + VOTING_DURATION_MS;
 
         Thread t = new Thread(() -> {
@@ -43,37 +65,29 @@ public class VotingService {
                     return;
                 }
 
-                Room room = roomRepository.findByRoomCode(roomCode).orElse(null);
-                if (room == null) return;
+                if (Boolean.TRUE.equals(finishingFlags.get(roomCode).get())) {
+                    return;
+                }
 
-                if (!"VOTING".equals(room.getStatus())) return;
+                Room currentRoom = roomRepository.findByRoomCode(roomCode).orElse(null);
+                if (currentRoom == null) return;
 
-
-                List<Player> activePlayers = room.getPlayers()
-                        .stream()
-                        .filter(Player::isOnline)
-                        .filter(p -> !p.isBot())
-                        .toList();
-
-                Set<String> expectedVoters = activePlayers.stream()
-                        .map(Player::getPlayerId)
-                        .collect(Collectors.toSet());
-
+                if (!"VOTING".equals(currentRoom.getStatus())) return;
 
                 Set<String> actualVoters = voteService.getVotes(roomCode)
                         .stream()
-                        .map(Vote::getVoterId)
+                        .map(v -> normalize(v.getVoterId()))
                         .collect(Collectors.toSet());
 
-                int voteCount = actualVoters.size();
+                Set<String> expected = expectedVotersPerRoom.get(roomCode);
+                if (expected == null || expected.isEmpty()) return;
 
-                boolean allVoted = !expectedVoters.isEmpty()
-                        && actualVoters.containsAll(expectedVoters);
+                boolean allVoted =
+                        expected.stream().allMatch(actualVoters::contains);
 
                 boolean timeUp = System.currentTimeMillis() >= endTime;
 
                 if (allVoted || timeUp) {
-                    System.out.println("Finishing Voting for room: " + roomCode);
                     finishVoting(roomCode);
                     return;
                 }
@@ -85,6 +99,13 @@ public class VotingService {
     }
 
     private void finishVoting(String roomCode) {
+
+        AtomicBoolean flag = finishingFlags.get(roomCode);
+        if (flag == null || !flag.compareAndSet(false, true)) {
+            return; // already finished
+        }
+
+        System.out.println("Finishing Voting for room: " + roomCode);
 
         Room room = roomRepository.findByRoomCode(roomCode).orElse(null);
         if (room == null) return;
@@ -103,10 +124,6 @@ public class VotingService {
 
         boolean win = totalVotes > 0 && aiVotes > totalVotes / 2;
 
-        System.out.println("Voting Results for room " + roomCode);
-        System.out.println("Total Votes: " + totalVotes);
-        System.out.println("AI Votes: " + aiVotes);
-
         room.setStatus("END");
 
         room.setEndResult(Map.of(
@@ -123,6 +140,28 @@ public class VotingService {
         );
 
         voteService.clearVotes(roomCode);
-       
+
+        finishingFlags.remove(roomCode);
+        expectedVotersPerRoom.remove(roomCode);
+    }
+
+    private String normalize(String id) {
+        if (id == null) return null;
+
+        id = id.trim();
+
+        if (id.startsWith("\"") && id.endsWith("\"")) {
+            id = id.substring(1, id.length() - 1);
+        }
+
+        if (id.startsWith("{")) {
+            try {
+                return id.substring(id.indexOf(":\"") + 2, id.lastIndexOf("\""));
+            } catch (Exception e) {
+                return id;
+            }
+        }
+
+        return id;
     }
 }
